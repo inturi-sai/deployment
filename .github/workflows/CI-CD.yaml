@@ -1,0 +1,62 @@
+steps:
+  # Frontend build steps
+  - name: 'node:20'
+    id: 'Install Frontend Dependencies'
+    entrypoint: 'npm'
+    args: ['install']
+    dir: 'frontend'
+
+  - name: 'node:20'
+    id: 'Run Frontend Tests'
+    entrypoint: 'npm'
+    args: ['test']
+    dir: 'frontend'
+
+  - name: 'node:14'
+    id: 'Build Frontend'
+    entrypoint: 'npm'
+    args: ['run', 'build']
+    dir: 'frontend'
+
+  # Deploy Frontend
+  - name: 'gcr.io/cloud-builders/gcloud'
+    id: 'Deploy Frontend'
+    entrypoint: 'sh'
+    args:
+      - '-c'
+      - |
+        gcloud app deploy --project=$PROJECT_ID
+    env:
+      - 'PROJECT_ID=$PROJECT_ID'
+    dir: 'frontend'
+
+  # Backend build steps
+  - name: 'node:14'
+    id: 'Install Backend Dependencies'
+    entrypoint: 'npm'
+    args: ['install']
+    dir: 'backend'
+
+  - name: 'node:14'
+    id: 'Run Backend Tests'
+    entrypoint: 'npm'
+    args: ['test']
+    dir: 'backend'
+
+  # Deploy Backend
+  - name: 'gcr.io/cloud-builders/gcloud'
+    id: 'Deploy Backend'
+    entrypoint: 'sh'
+    args:
+      - '-c'
+      - |
+        gcloud app deploy --project=$PROJECT_ID
+    env:
+      - 'PROJECT_ID=$PROJECT_ID'
+    dir: 'backend'
+
+timeout: '1200s'
+
+substitutions:
+  _PROJECT_ID: 'YOUR_PROJECT_ID'
+
